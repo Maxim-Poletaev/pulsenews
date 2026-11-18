@@ -136,3 +136,5 @@ ADMIN_INDEX_TITLE = "Панель управления"
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
