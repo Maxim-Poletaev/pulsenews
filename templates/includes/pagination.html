@@ -1,0 +1,49 @@
+{% if is_paginated %}
+<nav class="mt-5" aria-label="Пагинация">
+    <ul class="pagination justify-content-center flex-wrap">
+
+        {# Назад #}
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    ←
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">←</span></li>
+        {% endif %}
+
+        {# Номера страниц с «…» #}
+        {% for num in page_obj.paginator.get_elided_page_range %}
+            {% if num == page_obj.paginator.ELLIPSIS %}
+                <li class="page-item disabled"><span class="page-link">{{ num }}</span></li>
+            {% elif num == page_obj.number %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% else %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}page={{ num }}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Вперёд #}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link"
+                   href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}{% if request.GET.sort %}sort={{ request.GET.sort }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    →
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled"><span class="page-link">→</span></li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}

@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}{{ article.title }} — PulseNews{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a href="{% url 'news:home' %}">Главная</a></li>
+        {% if article.category %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'news:category' slug=article.category.slug %}">{{ article.category.name }}</a>
+            </li>
+        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">{{ article.title|truncatechars:40 }}</li>
+    </ol>
+</nav>
+
+<article>
+    <h1 class="mb-3">{{ article.title }}</h1>
+
+    <div class="d-flex flex-wrap gap-3 text-muted small mb-4">
+        <span><i class="bi bi-person"></i> {{ article.author.get_full_name|default:article.author.username }}</span>
+        <span><i class="bi bi-calendar"></i> {{ article.published_at|date:"d.m.Y H:i" }}</span>
+        <span><i class="bi bi-eye"></i> {{ article.views }} просмотров</span>
+        {% if article.category %}
+            <span><i class="bi bi-tag"></i> {{ article.category.name }}</span>
+        {% endif %}
+    </div>
+
+    {% if article.cover %}
+        <img src="{{ article.cover.url }}" class="img-fluid rounded mb-4" alt="">
+    {% endif %}
+
+    <div class="lead text-muted mb-4">{{ article.summary }}</div>
+
+    <div class="article-body">
+        {{ article.body|linebreaks }}
+    </div>
+
+{% if article.tags.all %}
+    <div class="mt-4">
+        {% for tag in article.tags.all %}
+            <a href="{% url 'news:tag' slug=tag.slug %}"
+               class="badge bg-secondary text-decoration-none me-1">
+                #{{ tag.name }}
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}
+</article>
+<div class="mt-4 d-flex gap-2">
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            id="shareBtn"
+            data-title="{{ article.title|escapejs }}"
+            data-url="{{ request.build_absolute_uri }}">
+        <i class="bi bi-share"></i> Поделиться
+    </button>
+    <button type="button"
+            class="btn btn-sm btn-outline-secondary"
+            id="copyBtn"
+            data-url="{{ request.build_absolute_uri }}">
+        <i class="bi bi-link-45deg"></i> Копировать ссылку
+    </button>
+</div>
+<hr class="my-5">
+
+<!-- Похожие статьи -->
+{% if related %}
+    <section class="mb-5">
+        <h2 class="h4 mb-3">Похожие статьи</h2>
+        <div class="row g-3">
+            {% for a in related %}
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            {% if a.category %}
+                                <span class="badge bg-warning text-dark mb-2">{{ a.category.name }}</span>
+                            {% endif %}
+                            <h6 class="card-title mb-2">
+                                <a href="{% url 'news:article_detail' slug=a.slug %}"
+                                   class="text-decoration-none text-dark">
+                                    {{ a.title|truncatechars:60 }}
+                                </a>
+                            </h6>
+                            <div class="small text-muted">
+                                {{ a.published_at|date:"d.m.Y" }} · <i class="bi bi-eye"></i> {{ a.views }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+{% endif %}
+
+<!-- Комментарии -->
+<section class="mb-4">
+    <h2 class="h4 mb-3">Комментарии ({{ comments|length }})</h2>
+
+    {% if comments %}
+        {% for c in comments %}
+            <div class="border-start border-3 ps-3 mb-3">
+                <div class="d-flex justify-content-between small text-muted mb-1">
+                    <strong>{{ c.author.get_full_name|default:c.author.username }}</strong>
+                    <span>{{ c.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <div>{{ c.text|linebreaks }}</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="text-muted">Пока нет комментариев.</p>
+    {% endif %}
+
+        {# ─── Форма добавления комментария ─── #}
+    <div class="mt-4">
+        {% if user.is_authenticated %}
+            <h3 class="h6 mb-2">Оставить комментарий</h3>
+            <form method="post" action="{% url 'news:comment_create' slug=article.slug %}">
+                {% csrf_token %}
+                {{ comment_form.text }}
+                {% if comment_form.text.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ comment_form.text.errors|join:", " }}
+                    </div>
+                {% endif %}
+                <button type="submit" class="btn btn-warning btn-sm mt-2">
+                    <i class="bi bi-send"></i> Отправить
+                </button>
+                <span class="text-muted small ms-2">
+                    Комментарий появится после модерации.
+                </span>
+            </form>
+        {% else %}
+            <div class="alert alert-secondary small mb-0">
+                <a href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">
+                    Войдите
+                </a>, чтобы оставить комментарий.
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<div class="d-flex justify-content-between mt-4">
+    <a href="{% url 'news:home' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Все новости
+    </a>
+</div>
+{% endblock %}

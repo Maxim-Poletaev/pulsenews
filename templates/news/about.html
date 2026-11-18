@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}О проекте — PulseNews{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">О проекте <span class="text-warning">PulseNews</span></h1>
+
+        <p class="lead text-muted">
+            PulseNews — учебный проект новостного агентства на Django.
+            Демонстрирует модели, роли, админку, публичную часть и кабинет автора.
+        </p>
+
+        <h2 class="h5 mt-4">Что внутри</h2>
+        <ul>
+            <li>Модели <code>User</code>, <code>Category</code>, <code>Tag</code>, <code>Article</code>, <code>Comment</code></li>
+            <li>Статусы статьи: черновик → на проверке → опубликовано → архив</li>
+            <li>Роли: читатель, автор, редактор, администратор</li>
+            <li>Публичная часть: лента, категории, теги, поиск, детальная</li>
+            <li>Комментарии с модерацией</li>
+            <li>Кабинет автора с CRUD статей</li>
+            <li>Админка с inline-комментариями и ограничениями по ролям</li>
+        </ul>
+
+        <h2 class="h5 mt-4">Стек</h2>
+        <p>
+            Python 3.12, Django 5.0, SQLite, Bootstrap 5, Pillow, python-decouple.
+        </p>
+
+
+        <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'news:home' %}" class="btn btn-warning">На главную</a>
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary">Войти</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

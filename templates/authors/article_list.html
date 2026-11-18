@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Кабинет автора — PulseNews{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+        {% if is_editor %}Все статьи{% else %}Мои статьи{% endif %}
+    </h1>
+    <a href="{% url 'authors:article_create' %}" class="btn btn-warning">
+        <i class="bi bi-plus-lg"></i> Новая статья
+    </a>
+</div>
+
+{% if articles %}
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Заголовок</th>
+                    <th>Категория</th>
+                    {% if is_editor %}<th>Автор</th>{% endif %}
+                    <th>Статус</th>
+                    <th>Опубликовано</th>
+                    <th>Просмотры</th>
+                    <th class="text-end">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'news:article_detail' slug=article.slug %}"
+                               class="text-decoration-none text-dark" target="_blank">
+                                {{ article.title|truncatechars:60 }}
+                            </a>
+                        </td>
+                        <td>{{ article.category.name|default:"—" }}</td>
+                        {% if is_editor %}<td>{{ article.author.username }}</td>{% endif %}
+                        <td>
+                            <span class="badge
+                                {% if article.status == 'published' %}bg-success
+                                {% elif article.status == 'review' %}bg-warning text-dark
+                                {% elif article.status == 'archived' %}bg-secondary
+                                {% else %}bg-light text-dark border{% endif %}">
+                                {{ article.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="small text-muted">
+                            {{ article.published_at|date:"d.m.Y H:i"|default:"—" }}
+                        </td>
+                        <td>{{ article.views }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'authors:article_edit' slug=article.slug %}"
+                               class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'authors:article_delete' slug=article.slug %}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% include "includes/pagination.html" %}
+{% else %}
+    <div class="alert alert-info">
+        У вас пока нет статей.
+        <a href="{% url 'authors:article_create' %}">Создать первую</a>.
+    </div>
+{% endif %}
+{% endblock %}

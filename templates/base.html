@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PulseNews — пульс событий{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="{% url 'news:home' %}">
+            <span class="text-warning">Pulse</span>News
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Меню">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'news:home' %}">Главная</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'news:article_list' %}">Все новости</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'news:about' %}">О проекте</a>
+                </li>
+            </ul>
+
+            <form class="d-flex me-lg-3 my-2 my-lg-0" role="search" action="{% url 'news:search' %}" method="get">
+                <input class="form-control form-control-sm me-2" type="search" name="q"
+                       placeholder="Поиск..." value="{{ request.GET.q|default:'' }}">
+                <button class="btn btn-sm btn-warning" type="submit" aria-label="Найти">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i>
+                            {{ user.get_full_name|default:user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% if user.is_author_role or user.is_superuser %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'authors:my_articles' %}">
+                                        <i class="bi bi-pencil-square"></i> Кабинет автора
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% if user.is_staff %}
+                                <li>
+                                    <a class="dropdown-item" href="/admin/">
+                                        <i class="bi bi-gear"></i> Админка
+                                    </a>
+                                </li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'accounts:logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="bi bi-box-arrow-right"></i> Выйти
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">
+                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:register' %}">
+                            <i class="bi bi-person-plus"></i> Регистрация
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<main class="flex-grow-1 py-4">
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                {% if message.tags == "error" %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {% else %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {% endif %}
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+
+<footer class="bg-dark text-white-50 py-4 mt-auto">
+    <div class="container">
+        <div class="row small">
+            <div class="col-md-4 mb-2 mb-md-0">
+                <div class="fw-bold text-white mb-1">
+                    <span class="text-warning">Pulse</span>News
+                </div>
+                © {% now "Y" %} Учебный проект на Django.
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <div class="text-white-50 mb-1">Разделы</div>
+                <a href="{% url 'news:home' %}" class="text-white-50 d-block">Главная</a>
+                <a href="{% url 'news:article_list' %}" class="text-white-50 d-block">Все новости</a>
+                <a href="{% url 'news:about' %}" class="text-white-50 d-block">О проекте</a>
+            </div>
+            <div class="col-md-4">
+                <div class="text-white-50 mb-1">Редакция</div>
+                <a href="/admin/" class="text-white-50 d-block">Админка</a>
+                <a href="{% url 'accounts:login' %}" class="text-white-50 d-block">Вход</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const shareBtn = document.getElementById("shareBtn");
+    const copyBtn  = document.getElementById("copyBtn");
+
+    if (shareBtn) {
+        shareBtn.addEventListener("click", async function () {
+            const data = { title: shareBtn.dataset.title, url: shareBtn.dataset.url };
+            if (navigator.share) {
+                try { await navigator.share(data); } catch (e) {}
+            } else {
+                try {
+                    await navigator.clipboard.writeText(data.url);
+                    shareBtn.innerHTML = '<i class="bi bi-check2"></i> Ссылка скопирована';
+                    setTimeout(() => { shareBtn.innerHTML = '<i class="bi bi-share"></i> Поделиться'; }, 2000);
+                } catch (e) { window.prompt("Скопируйте ссылку:", data.url); }
+            }
+        });
+    }
+    if (copyBtn) {
+        copyBtn.addEventListener("click", async function () {
+            try {
+                await navigator.clipboard.writeText(copyBtn.dataset.url);
+                copyBtn.innerHTML = '<i class="bi bi-check2"></i> Скопировано';
+                setTimeout(() => { copyBtn.innerHTML = '<i class="bi bi-link-45deg"></i> Копировать ссылку'; }, 2000);
+            } catch (e) { window.prompt("Скопируйте ссылку:", copyBtn.dataset.url); }
+        });
+    }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

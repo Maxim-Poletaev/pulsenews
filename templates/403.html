@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}403 — Доступ запрещён{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <div class="display-1 text-warning fw-bold">403</div>
+    <h1 class="h3 mt-3">Доступ запрещён</h1>
+    <p class="text-muted">
+        У вас нет прав для просмотра этой страницы.
+        {% if exception %}<br><small>{{ exception }}</small>{% endif %}
+    </p>
+    <div class="d-flex gap-2 justify-content-center mt-4">
+        <a href="{% url 'news:home' %}" class="btn btn-warning">На главную</a>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-outline-secondary">Войти</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
