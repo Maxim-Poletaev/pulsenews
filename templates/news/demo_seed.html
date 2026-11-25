@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Демо-данные — PulseNews{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <h1 class="h3 mb-3">Демо-данные</h1>
+        <p class="text-muted">
+            Нажмите кнопку — в базе данных будут созданы тестовые пользователи, категории, теги, статьи и комментарии.
+            Повторный клик не создаст дубликатов (кроме комментариев, если их ещё нет).
+        </p>
+
+        {# Статистика #}
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-2">
+                <div class="card text-center"><div class="card-body p-2">
+                    <div class="h4 mb-0">{{ stats.users }}</div>
+                    <div class="small text-muted">Пользователей</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center"><div class="card-body p-2">
+                    <div class="h4 mb-0">{{ stats.articles }}</div>
+                    <div class="small text-muted">Статей</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center"><div class="card-body p-2">
+                    <div class="h4 mb-0">{{ stats.categories }}</div>
+                    <div class="small text-muted">Категорий</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center"><div class="card-body p-2">
+                    <div class="h4 mb-0">{{ stats.tags }}</div>
+                    <div class="small text-muted">Тегов</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-md-2">
+                <div class="card text-center"><div class="card-body p-2">
+                    <div class="h4 mb-0">{{ stats.comments }}</div>
+                    <div class="small text-muted">Комментариев</div>
+                </div></div>
+            </div>
+        </div>
+
+        {# Таблица пользователей #}
+        <h2 class="h5 mb-2">Тестовые пользователи</h2>
+        <div class="table-responsive mb-4">
+            <table class="table table-sm table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Логин</th>
+                        <th>Пароль</th>
+                        <th>Роль</th>
+                        <th>Имя</th>
+                        <th>Админка</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in test_users %}
+                        <tr>
+                            <td><code>{{ u.username }}</code></td>
+                            <td><code>{{ u.password }}</code></td>
+                            <td>
+                                <span class="badge
+                                    {% if u.role == 'admin' %}bg-danger
+                                    {% elif u.role == 'editor' %}bg-warning text-dark
+                                    {% elif u.role == 'author' %}bg-info text-dark
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ u.role }}
+                                </span>
+                            </td>
+                            <td>{{ u.first_name }} {{ u.last_name }}</td>
+                            <td>{% if u.is_staff %}✅{% else %}—{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {# Кнопка seed #}
+        <form method="post" action="{% url 'news:demo_seed_run' %}" class="d-flex gap-2">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-warning">
+                <i class="bi bi-database-add"></i> Создать пользователей и статьи в БД
+            </button>
+            <a href="{% url 'news:home' %}" class="btn btn-outline-secondary">На главную</a>
+        </form>
+
+        <p class="text-muted small mt-3">
+            После создания зайдите в <a href="/admin/">админку</a> или на
+            <a href="{% url 'accounts:login' %}">страницу входа</a> под одним из пользователей.
+        </p>
+    </div>
+</div>
+{% endblock %}

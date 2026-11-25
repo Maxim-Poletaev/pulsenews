@@ -5,6 +5,8 @@ Django settings для проекта PulseNews.
 from pathlib import Path
 from decouple import config, Csv
 from django.contrib.messages import constants as messages
+import dj_database_url
+
 
 # ─────────────────────────────────────────────
 # Пути
@@ -15,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Безопасность
 # ─────────────────────────────────────────────
 SECRET_KEY = config("SECRET_KEY")
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # ─────────────────────────────────────────────
@@ -76,13 +78,12 @@ TEMPLATES = [
 WSGI_APPLICATION = "signal_1.wsgi.application"
 
 # ─────────────────────────────────────────────
-# База данных (SQLite на старте)
+# База данных
 # ─────────────────────────────────────────────
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=config("DATABASE_URL", default="sqlite:///db.sqlite3")
+    )
 }
 
 # ─────────────────────────────────────────────

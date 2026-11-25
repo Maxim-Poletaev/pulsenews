@@ -1,5 +1,5 @@
 from django.db.models import F
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 from apps.core.pagination import ElidedPaginator
 from .models import Article, Category, Comment, Tag
 from django.contrib import messages
@@ -7,6 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 from .forms import CommentForm
+from .services import TEST_USERS, seed_users, seed_articles
+from apps.accounts.models import User
+
 
 class TagListView(ListView):
     model = Article
@@ -181,3 +184,33 @@ def comment_create(request, slug):
         messages.error(request, "Не удалось отправить комментарий. Проверьте текст.")
 
     return redirect(article.get_absolute_url())
+
+
+class DemoSeedView(TemplateView):
+    """Страница с тестовыми пользователями и кнопкой seed."""
+    template_name = "news/demo_seed.html"
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["test_users"] = TEST_USERS
+        ctx["stats"] = {
+            "users": User.objects.count(),
+            "articles": Article.objects.count(),
+            "categories": Category.objects.count(),
+            "tags": Tag.objects.count(),
+            "comments": Comment.objects.count(),
+        }
+        return ctx
+
+
+@require_POST
+def demo_seed_run(request):
+    """Создаёт пользователей и статьи. Только POST."""
+    users_created, users_updated = seed_users()
+    articles_created, comments_created = seed_articles()
+    messages.success(
+        request,
+        f"Готово. Пользователей: создано {users_created}, обновлено {users_updated}. "
+        f"Статей: +{articles_created}. Комментариев: +{comments_created}."
+    )
+    return redirect("news:demo_seed")

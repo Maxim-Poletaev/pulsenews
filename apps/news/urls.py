@@ -14,4 +14,6 @@ urlpatterns = [
     path("tag/<str:slug>/", views.TagListView.as_view(), name="tag"),
     path("news/<str:slug>/comment/", views.comment_create, name="comment_create"),
     path("about/", TemplateView.as_view(template_name="news/about.html"), name="about"),
+    path("demo/seed/", views.DemoSeedView.as_view(), name="demo_seed"),
+    path("demo/seed/run/", views.demo_seed_run, name="demo_seed_run"),
 ]
